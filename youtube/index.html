@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -80,6 +80,11 @@
     .site-title a:hover {
       text-decoration: none;
       color: #38b038;
+    }
+
+    .title-com {
+      font-size: 0.5em;
+      vertical-align: baseline;
     }
 
     .site-tagline {
@@ -393,16 +398,16 @@
 
   <header class="site-header">
     <div class="site-header-inner">
-      <h1 class="site-title"><a href="/home">Miiiics.com</a></h1>
-      <p class="site-tagline">thoughts, projects, music, pixels, and the occasional Pokémon take.</p>
+      <h1 class="site-title"><a href="/miiiics/home">Miiiics<span class="title-com">.com</span></a></h1>
+      <p class="site-tagline">- where curiosity, creativity, and ADHD collide -</p>
       <nav class="site-nav" aria-label="Main navigation">
-        <a href="/home">Home</a>
-        <a href="/projects">Projects</a>
-        <a href="/music">Music</a>
-        <a href="/pokemon">Pokémon</a>
-        <a href="/art">Art</a>
-        <a href="/youtube" class="nav-active">YouTube</a>
-        <a href="/misc">Misc.</a>
+        <a href="/miiiics/home">Home</a>
+        <a href="/miiiics/projects">Projects</a>
+        <a href="/miiiics/music">Music</a>
+        <a href="/miiiics/pokemon">Pokémon</a>
+        <a href="/miiiics/art">Art</a>
+        <a href="/miiiics/youtube" class="nav-active">YouTube</a>
+        <a href="/miiiics/miscellaneous">Misc.</a>
       </nav>
     </div>
   </header>
@@ -506,7 +511,7 @@
   </main>
 
   <footer class="site-footer">
-    &copy; 2026 <a href="/home">miiiics.com</a>
+    &copy; 2026 <a href="/miiiics/home">miiiics.com</a>
   </footer>
 
   <script>
@@ -567,7 +572,9 @@
       var hdr = document.querySelector('.site-header');
       if (!hdr) return;
       var navAs = Array.from(hdr.querySelectorAll('.site-nav a'));
+      var cooling = false;
       function flipNav(compact) {
+        cooling = true;
         navAs.forEach(function(a) { a.style.transition = 'none'; a.style.transform = ''; });
         var firsts = navAs.map(function(a) { return a.getBoundingClientRect(); });
         hdr.classList.toggle('header-compact', compact);
@@ -584,10 +591,13 @@
           navAs[0].addEventListener('transitionend', function h() {
             navAs[0].removeEventListener('transitionend', h);
             navAs.forEach(function(a) { a.style.transition = ''; a.style.transform = ''; });
+            cooling = false;
           });
         }
+        setTimeout(function() { cooling = false; }, 500);
       }
       window.addEventListener('scroll', function () {
+        if (cooling) return;
         var c = window.scrollY > 10;
         if (hdr.classList.contains('header-compact') !== c) flipNav(c);
       }, { passive: true });
