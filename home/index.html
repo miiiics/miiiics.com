@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Miiiics.com</title>
   <meta name="description" content="Miiiics.com — a blog for thoughts, observations, and everything in between." />
   <meta property="og:title" content="Miiiics.com" />
@@ -48,13 +48,13 @@
 
     /* ── Site header ── */
     .site-header {
-      background: #111111;
+      background: linear-gradient(to bottom, #1c1c1c, #050505);
       border-bottom: 2px solid #2d8c2d;
-      padding: 2rem 1.5rem 0;
+      padding: 2rem calc(1.5rem + env(safe-area-inset-right)) 0 calc(1.5rem + env(safe-area-inset-left));
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 6px rgba(45, 140, 45, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85), 0 2px 6px rgba(0, 0, 0, 0.6);
       transition: padding 0.25s ease, background 0.25s ease;
     }
 
@@ -100,8 +100,8 @@
     }
 
     .site-header.header-compact {
-      padding: 0.1rem 1.5rem;
-      background: #0a0a0a;
+      padding: 0.1rem calc(1.5rem + env(safe-area-inset-right)) 0.1rem calc(1.5rem + env(safe-area-inset-left));
+      background: linear-gradient(to bottom, #111111, #020202);
     }
 
     .site-header.header-compact .site-header-inner {
@@ -144,7 +144,7 @@
       left: 0;
       right: 0;
       height: 100%;
-      background: radial-gradient(ellipse var(--blip-spread, 20%) 100% at var(--blip-pct, -10%) 100%, rgba(45, 140, 45, 0.12) 0%, rgba(45, 140, 45, 0.04) 50%, transparent 80%);
+      background: radial-gradient(ellipse var(--blip-spread, 22%) 100% at var(--blip-pct, -10%) 100%, rgba(45, 140, 45, 0.15) 0%, rgba(45, 140, 45, 0.05) 50%, transparent 90%);
       opacity: var(--blip-alpha, 0);
       pointer-events: none;
       z-index: -1;
@@ -493,6 +493,8 @@
         canvas.height = window.innerHeight;
       }
       window.addEventListener('resize', resize);
+      window.addEventListener('orientationchange', function() { setTimeout(resize, 50); });
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
       resize();
       for (let i = 0; i < COUNT; i++) {
         particles.push({
@@ -621,7 +623,7 @@
           tx = -100 + ease(t) * 1000;
           alpha = t < FADE ? t / FADE : t > 1 - FADE ? (1 - t) / FADE : 1;
           var vel = (t < 0.5 ? 4*t : 4 - 4*t) / 2;
-          spread = 20 + vel * 35;
+          spread = 22 + vel * 50;
         }
         hdr.style.setProperty('--blip-tx', tx.toFixed(1));
         hdr.style.setProperty('--blip-alpha', alpha.toFixed(3));
