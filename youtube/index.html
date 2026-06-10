@@ -22,6 +22,14 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/Coolvetica Rg.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
     *, *::before, *::after { box-sizing: border-box; }
 
     html { background: #0f0f0f; }
@@ -75,12 +83,23 @@
 
     .site-title a {
       color: #e8e8e8;
+      line-height: 1;
     }
 
     .site-title a:hover {
       text-decoration: none;
       color: #38b038;
     }
+
+    .logo-i, .logo-s {
+      display: inline-block;
+      transform-origin: 50% 88%;
+    }
+
+    .logo-i-outer { transform: scaleY(1.05); }
+    .logo-i-inner { transform: scaleY(1.10); }
+    .logo-s { transform: scaleY(0.92); }
+    .logo-m { display: inline-block; clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%); }
 
     .title-com {
       font-size: 0.5em;
@@ -331,8 +350,9 @@
 
     .post-title {
       margin: 0 0 0.6rem;
+      font-family: 'Coolvetica', sans-serif;
       font-size: 1.45rem;
-      font-weight: 700;
+      font-weight: normal;
       line-height: 1.25;
       text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
     }
@@ -414,7 +434,7 @@
 
   <header class="site-header">
     <div class="site-header-inner">
-      <h1 class="site-title"><a href="/miiiics/home">Miiiics<span class="title-com">.com</span></a></h1>
+      <h1 class="site-title"><a href="/miiiics/home"><span class="logo-m">M</span><span class="logo-i logo-i-outer">i</span><span class="logo-i logo-i-inner">i</span><span class="logo-i logo-i-inner">i</span><span class="logo-i logo-i-outer">i</span>c<span class="logo-s">s</span><span class="title-com">.com</span></a></h1>
       <p class="site-tagline">- where curiosity, creativity, and ADHD collide -</p>
       <nav class="site-nav" aria-label="Main navigation">
         <a href="/miiiics/home">Home</a>
@@ -695,16 +715,42 @@
         nav.style.setProperty('--fade-l', (max > 0 && left > 2) ? '7%' : '0%');
         nav.style.setProperty('--fade-r', (max > 0 && left < max - 2) ? '7%' : '0%');
       }
-      nav.addEventListener('scroll', updateFades, { passive: true });
       window.addEventListener('resize', function() { requestAnimationFrame(updateFades); });
       requestAnimationFrame(updateFades);
-      var rubber = 0;
+      var rubber = 0, bouncing = false;
+      var prevLeft = nav.scrollLeft, vel = 0;
+      function doSpring(amount) {
+        bouncing = true;
+        nav.style.transition = 'none';
+        nav.style.transform = 'translateX(' + amount.toFixed(1) + 'px)';
+        requestAnimationFrame(function() {
+          nav.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          nav.style.transform = '';
+          setTimeout(function() { bouncing = false; nav.style.transition = ''; }, 560);
+        });
+      }
       function release() {
         if (rubber === 0) return;
         rubber = 0;
         nav.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
         nav.style.transform = '';
+        setTimeout(function() { nav.style.transition = ''; }, 560);
       }
+      nav.addEventListener('scroll', function() {
+        var left = nav.scrollLeft;
+        var max = nav.scrollWidth - nav.clientWidth;
+        var delta = left - prevLeft;
+        vel = vel * 0.4 + delta * 0.6;
+        if (!bouncing && rubber === 0) {
+          if (left <= 0 && prevLeft > 1 && vel < -4) {
+            doSpring(Math.min(-vel * 0.55, 28));
+          } else if (max > 0 && left >= max - 1 && prevLeft < max - 1 && vel > 4) {
+            doSpring(Math.max(-vel * 0.55, -28));
+          }
+        }
+        prevLeft = left;
+        updateFades();
+      }, { passive: true });
       nav.addEventListener('wheel', function(e) {
         if (Math.abs(e.deltaX) < 1) return;
         var max = nav.scrollWidth - nav.clientWidth;
