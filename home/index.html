@@ -58,7 +58,7 @@
     .site-header {
       background: linear-gradient(to bottom, #1c1c1c, #050505);
       border-bottom: 2px solid #2d8c2d;
-      padding: 2rem calc(1.5rem + env(safe-area-inset-right)) 0 calc(1.5rem + env(safe-area-inset-left));
+      padding: 2.1rem calc(1.5rem + env(safe-area-inset-right)) 0 calc(1.5rem + env(safe-area-inset-left));
       position: sticky;
       top: 0;
       z-index: 100;
@@ -73,7 +73,8 @@
 
     .site-title {
       margin: 0;
-      font-size: 2.2rem;
+      font-size: 3rem;
+      line-height: 1;
       font-weight: 900;
       letter-spacing: 0.08em;
       font-family: 'Bebas Neue', Georgia, serif;
@@ -107,7 +108,7 @@
     }
 
     .site-tagline {
-      margin: 0.25rem 0 1.25rem;
+      margin: 0.25rem 0 0.45rem;
       font-size: 0.95rem;
       color: #777;
       font-style: italic;
@@ -301,6 +302,12 @@
       letter-spacing: 0.03em;
       text-transform: uppercase;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+      text-decoration: none;
+    }
+
+    .badge:hover {
+      opacity: 0.8;
+      text-decoration: none;
     }
 
     .badge-music    { background: #3d1a2e; color: #d4699a; }
@@ -403,114 +410,26 @@
 
   <header class="site-header">
     <div class="site-header-inner">
-      <h1 class="site-title"><a href="/miiiics/home"><span class="logo-m">M</span><span class="logo-i logo-i-outer">i</span><span class="logo-i logo-i-inner">i</span><span class="logo-i logo-i-inner">i</span><span class="logo-i logo-i-outer">i</span>c<span class="logo-s">s</span><span class="title-com">.com</span></a></h1>
+      <h1 class="site-title"><a href="/home"><span class="logo-m">M</span><span class="logo-i logo-i-outer">i</span><span class="logo-i logo-i-inner">i</span><span class="logo-i logo-i-inner">i</span><span class="logo-i logo-i-outer">i</span>c<span class="logo-s">s</span><span class="title-com">.com</span></a></h1>
       <p class="site-tagline">- where curiosity, creativity, and ADHD collide -</p>
       <nav class="site-nav" aria-label="Main navigation">
-        <a href="/miiiics/home" class="nav-active">Home</a>
-        <a href="/miiiics/projects">Projects</a>
-        <a href="/miiiics/music">Music</a>
-        <a href="/miiiics/pokemon">Pokémon</a>
-        <a href="/miiiics/art">Art</a>
-        <a href="/miiiics/youtube">YouTube</a>
-        <a href="/miiiics/miscellaneous">Misc.</a>
+        <a href="/home" class="nav-active">Home</a>
+        <a href="/projects">Projects</a>
+        <a href="/music">Music</a>
+        <a href="/pokemon">Pokémon</a>
+        <a href="/art">Art</a>
+        <a href="/youtube">YouTube</a>
+        <a href="/miscellaneous">Misc.</a>
       </nav>
     </div>
   </header>
 
   <main>
-
-    <article class="post">
-      <div class="post-meta">
-        <span class="badge badge-youtube">&#9654; YouTube</span>
-        <span>December 29, 2024</span>
-      </div>
-      <h2 class="post-title"><a href="https://www.youtube.com/watch?v=CQqm2YP1iAw" target="_blank" rel="noopener">I Flew Across the Country to Rank Every Gas Station</a></h2>
-      <div class="video-wrapper">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/CQqm2YP1iAw?si=hXm82havGv0_7-KT" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-      </div>
-    </article>
-
-    <article class="post">
-      <div class="post-meta">
-        <span class="badge badge-youtube">&#9654; YouTube</span>
-        <span>May 20, 2023</span>
-      </div>
-      <h2 class="post-title"><a href="https://www.youtube.com/watch?v=aIcIiBeMugs" target="_blank" rel="noopener">The BEST START Possible in Minecraft Hardcore</a></h2>
-      <div class="video-wrapper">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/aIcIiBeMugs?si=zAitZHglaswqekbA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-      </div>
-    </article>
-
-    <article class="post">
-      <div class="post-meta">
-        <span class="badge badge-youtube">&#9654; YouTube</span>
-        <span>April 22, 2023</span>
-      </div>
-      <h2 class="post-title"><a href="https://www.youtube.com/watch?v=toa8-WzqKqE" target="_blank" rel="noopener">Building a MASSIVE Starter Base in Hardcore Minecraft...</a></h2>
-      <div class="video-wrapper">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/toa8-WzqKqE?si=P6pM1BCrXc1EGPf7" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-      </div>
-    </article>
-
-    <article class="post">
-      <div class="post-meta">
-        <span class="badge badge-youtube">&#9654; YouTube</span>
-        <span>April 18, 2023</span>
-      </div>
-      <h2 class="post-title"><a href="https://www.youtube.com/watch?v=9eWe2lcFV8A" target="_blank" rel="noopener">Minecraft Hardcore but it's really annoying…</a></h2>
-      <div class="video-wrapper">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/9eWe2lcFV8A?si=8k6EJbv0PDaPkBWB" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-      </div>
-    </article>
-
-    <article class="post">
-      <div class="post-meta">
-        <span class="badge badge-youtube">&#9654; YouTube</span>
-        <span>April 15, 2023</span>
-      </div>
-      <h2 class="post-title"><a href="https://www.youtube.com/watch?v=A6p3Z17grpU" target="_blank" rel="noopener">Minecraft Veteran plays Hardcore in 2023...</a></h2>
-      <div class="video-wrapper">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/A6p3Z17grpU?si=Saf4rgfgaUWop4FW" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-      </div>
-    </article>
-
-    <article class="post">
-      <div class="post-meta">
-        <span class="badge badge-youtube">&#9654; YouTube</span>
-        <span>April 6, 2023</span>
-      </div>
-      <h2 class="post-title"><a href="https://www.youtube.com/watch?v=TaOt5zFYqMA" target="_blank" rel="noopener">Can I Break a World Record in 1 Hour?</a></h2>
-      <div class="video-wrapper">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/TaOt5zFYqMA?si=JdBktjPc9SvBxvh4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-      </div>
-    </article>
-
-    <article class="post">
-      <div class="post-meta">
-        <span class="badge badge-youtube">&#9654; YouTube</span>
-        <span>January 23, 2023</span>
-      </div>
-      <h2 class="post-title"><a href="https://www.youtube.com/watch?v=iNFWx0JQusA" target="_blank" rel="noopener">I Have TOO MANY Guitars...</a></h2>
-      <div class="video-wrapper">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/iNFWx0JQusA?si=DPP_OZjdCcKtAuRq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-      </div>
-    </article>
-
-    <article class="post">
-      <div class="post-meta">
-        <span class="badge badge-youtube">&#9654; YouTube</span>
-        <span>December 27, 2022</span>
-      </div>
-      <h2 class="post-title"><a href="https://www.youtube.com/watch?v=bDgJx_-omrE" target="_blank" rel="noopener">PRS SE 277 Baritone POV Unboxing!</a></h2>
-      <div class="video-wrapper">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/bDgJx_-omrE?si=TCNxkrCVW-zTQtME" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-      </div>
-    </article>
-
+    <div id="post-list"></div>
   </main>
 
   <footer class="site-footer">
-    &copy; 2026 <a href="/miiiics/home">miiiics.com</a>
+    &copy; 2026 <a href="/home">miiiics.com</a>
   </footer>
 
   <script>
@@ -733,5 +652,7 @@
       nav.addEventListener('mouseleave', release);
     }());
   </script>
+  <script src="../assets/posts.js"></script>
+  <script>window.renderPosts('post-list', null);</script>
 </body>
 </html>
