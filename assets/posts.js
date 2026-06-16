@@ -1,5 +1,15 @@
 window.POSTS = [
   {
+    cats: ['projects'],
+    date: 'June 15, 2026',
+    title: 'Introducing Miiiics.com!',
+    body: [
+      { type: 'p', text: 'I do a *lot* of different things in life, and it can be very messy and confusing trying to keep up with them all. To remedy this, I decided to build *[Miiiics.com](https://miiiics.com/)*! I\'m designing this website as a portfolio of sorts, with the intention of documenting and organizing my personal endeavors.' },
+      { type: 'p', text: 'This site will primarily serve as a checkpoint for myself. There are times when life gets hectic, and I feel like I\'ve lived so much life with nothing to show for it. The idea is that 10-15 years from now, when these projects are long forgotten, *[Miiiics.com](https://miiiics.com/)* will remain.' },
+      { type: 'p', text: 'With that being said, I\'ve put effort into the presentation for a reason. I hope that people can come to this site for their own enjoyment. Whether it\'s to learn from my mistakes, to laugh at what I spend my money on, or maybe even to inspire their own fun ideas, I hope that any and all visitors can take something from here and leave with a smile!' }
+    ]
+  },
+  {
     cats: ['misc', 'youtube'],
     date: 'December 29, 2024',
     title: 'I Flew Across the Country to Rank Every Gas Station',
@@ -58,13 +68,20 @@ window.POSTS = [
 ];
 
 window.BADGE_DEFS = {
-  art:      { cls: 'badge-art',      label: 'Art',       href: '/art' },
-  misc:     { cls: 'badge-misc',     label: '~ Misc.',   href: '/miscellaneous' },
-  music:    { cls: 'badge-music',    label: '♪ Music',   href: '/music' },
-  pokemon:  { cls: 'badge-pokemon',  label: 'Pokémon',  href: '/pokemon' },
-  projects: { cls: 'badge-projects', label: 'Projects',  href: '/projects' },
-  youtube:  { cls: 'badge-youtube',  label: '▶ YouTube', href: '/youtube' }
+  art:      { cls: 'badge-art',      label: '✏ Art',      href: '/art' },
+  misc:     { cls: 'badge-misc',     label: '⁂ Misc.',    href: '/miscellaneous' },
+  music:    { cls: 'badge-music',    label: '♪ Music',    href: '/music' },
+  pokemon:  { cls: 'badge-pokemon',  label: 'Pokémon',   href: '/pokemon' },
+  projects: { cls: 'badge-projects', label: '⚒ Projects', href: '/projects' },
+  youtube:  { cls: 'badge-youtube',  label: '▶ YouTube',  href: '/youtube' }
 };
+
+// Convert *text* pairs to <strong>text</strong>. Only single-asterisk pairs; no nesting.
+function renderInline(text) {
+  return text
+    .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+}
 
 window.renderPosts = function (containerId, pageCat) {
   var posts = pageCat
@@ -82,11 +99,37 @@ window.renderPosts = function (containerId, pageCat) {
       var d = window.BADGE_DEFS[c];
       return '<a href="' + d.href + '" class="badge ' + d.cls + '">' + d.label + '</a>';
     }).join('');
-    html += '<article class="post"><div class="post-meta">' + badges + '<span>' + p.date + '</span></div>';
-    html += '<h2 class="post-title"><a href="' + p.url + '" target="_blank" rel="noopener">' + p.title + '</a></h2>';
+    var hasBody = p.body && p.body.length;
+    html += '<article class="post' + (hasBody ? ' post-has-body' : '') + '"><div class="post-meta">' + badges + '<span>' + p.date + '</span></div>';
+
+    // Title: plain text when no url, linked when url is present
+    if (p.url) {
+      html += '<h2 class="post-title"><a href="' + p.url + '" target="_blank" rel="noopener">' + p.title + '</a></h2>';
+    } else {
+      html += '<h2 class="post-title">' + p.title + '</h2>';
+    }
+
+    // YouTube embed
     if (p.embedSrc) {
       html += '<div class="video-wrapper"><iframe width="560" height="315" src="' + p.embedSrc + '" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>';
     }
+
+    // Body blocks: paragraphs and inline images
+    if (p.body && p.body.length) {
+      html += '<div class="post-body">';
+      p.body.forEach(function (block) {
+        if (block.type === 'p') {
+          html += '<p>' + renderInline(block.text) + '</p>';
+        } else if (block.type === 'img') {
+          html += '<div class="image-wrapper"><img src="' + block.src + '" alt="' + (block.caption || '') + '"></div>';
+          if (block.caption) {
+            html += '<p class="image-caption">' + block.caption + '</p>';
+          }
+        }
+      });
+      html += '</div>';
+    }
+
     html += '</article>';
   });
   container.innerHTML = html;
