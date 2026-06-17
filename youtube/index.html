@@ -495,6 +495,29 @@
       border-radius: 6px;
       padding: 1rem 1.25rem;
     }
+    /* ── Show More ── */
+    .post-body-collapsed {
+      max-height: 320px;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to bottom, black 45%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 45%, transparent 100%);
+    }
+    .show-more-btn {
+      display: block;
+      width: 100%;
+      background: none;
+      border: 1px solid #3a3a3a;
+      border-radius: 6px;
+      color: #666;
+      cursor: pointer;
+      font-family: 'Coolvetica', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      padding: 7px;
+      margin-top: 6px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .show-more-btn:hover { color: #e8e8e8; border-color: #666; }
 
     .post-body p:not(.image-caption) {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -809,7 +832,7 @@
       nav.addEventListener('mouseleave', release);
     }());
   </script>
-  <script src="../assets/posts.js?v=3"></script>
+  <script src="../assets/posts.js?v=4"></script>
   <script>window.renderPosts('post-list', 'youtube');</script>
 </body>
 </html>

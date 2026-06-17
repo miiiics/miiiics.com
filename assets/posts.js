@@ -276,4 +276,25 @@ window.renderPosts = function (containerId, pageCat) {
     html += '</article>';
   });
   container.innerHTML = html;
+
+  container.querySelectorAll('.post-body').forEach(function (body) {
+    if (body.scrollHeight > 480) {
+      body.classList.add('post-body-collapsed');
+      var btn = document.createElement('button');
+      btn.className = 'show-more-btn';
+      btn.textContent = 'Show More ↓';
+      btn.onclick = function () {
+        var fullHeight = body.scrollHeight;
+        body.style.maxHeight = '320px';
+        body.style.overflow = 'hidden';
+        body.classList.remove('post-body-collapsed');
+        body.offsetHeight; // force reflow so transition fires
+        body.style.transition = 'max-height 1.1s ease-in-out';
+        body.style.maxHeight = fullHeight + 'px';
+        btn.remove();
+        setTimeout(function () { body.style.cssText = ''; }, 1110);
+      };
+      body.parentNode.insertBefore(btn, body.nextSibling);
+    }
+  });
 };
