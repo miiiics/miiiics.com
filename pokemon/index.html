@@ -327,6 +327,20 @@
       text-decoration: none;
     }
 
+    .badge-svg-icon {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      background-color: currentColor;
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      vertical-align: middle;
+      margin-right: 3px;
+      margin-bottom: 1px;
+    }
+
     .badge-music    { background: #3d1a2e; color: #d4699a; }
     .badge-art      { background: #1e1535; color: #9b7ed4; }
     .badge-pokemon  { background: #2e2100; color: #c49a3c; }
@@ -411,15 +425,66 @@
       height: auto;
     }
 
+    .image-wrapper + .image-caption { margin-top: -0.75rem; }
+
     .image-caption {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 0.78rem;
       color: #666;
-      text-align: center;
+      text-align: left;
       padding: 0.35rem 0.5rem 0.1rem;
       font-style: italic;
     }
 
+    /* ── Gallery ── */
+    .gallery { position: relative; margin-bottom: 1rem; }
+    .gallery-image-area { position: relative; }
+    .gallery-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.55);
+      color: #e8e8e8;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: background 0.2s;
+    }
+    .gallery-btn:hover { background: rgba(0,0,0,0.82); }
+    .gallery-prev { left: 10px; }
+    .gallery-next { right: 10px; }
+    .gallery-dots {
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 20px;
+      margin: 4px 0;
+    }
+    .gallery-dots-track {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .gallery-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #38b038;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity 0.45s ease;
+    }
     .post-body {
       margin-top: 0.75rem;
       background: rgba(0, 0, 0, 0.35);
@@ -428,7 +493,7 @@
       padding: 1rem 1.25rem;
     }
 
-    .post-body p {
+    .post-body p:not(.image-caption) {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 0.97rem;
       color: #b0b0b0;
@@ -454,7 +519,7 @@
     .site-footer {
       border-top: 1px solid #2a2a2a;
       padding: 1.5rem;
-      text-align: center;
+      text-align: left;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 0.8rem;
       color: #555;
@@ -506,7 +571,7 @@
 
   <main>
 
-    <p class="page-heading"><strong>🎮 Pokémon</strong> — pokémon superfan since 5 years old, and card collector since like right now.</p>
+    <p class="page-heading"><strong><span style="display:inline-block;width:1em;height:1em;background-color:currentColor;-webkit-mask-image:url(../assets/icons/pokeball.svg);mask-image:url(../assets/icons/pokeball.svg);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;vertical-align:middle;margin-right:0.2em;margin-bottom:0.1em;" aria-hidden="true"></span> Pokémon</strong> — pokémon superfan since 5 years old, and card collector since like right now.</p>
 
     <div id="post-list"></div>
 
@@ -588,6 +653,7 @@
       var cooling = false;
       function flipNav(compact) {
         cooling = true;
+        hdr.style.overflow = 'hidden';
         if (tagline) {
           tagline.style.transition = 'none';
           tagline.style.opacity = '0';
@@ -602,7 +668,10 @@
         var tFirst = title ? title.getBoundingClientRect() : null;
         hdr.classList.toggle('header-compact', compact);
         navAs.forEach(function(a, i) {
-          a.style.transform = 'translateX(' + (firsts[i].left - a.getBoundingClientRect().left).toFixed(1) + 'px)';
+          var vw = window.innerWidth || document.documentElement.clientWidth;
+          var raw = firsts[i].left - a.getBoundingClientRect().left;
+          var clamped = Math.max(-vw, Math.min(vw, raw));
+          a.style.transform = 'translateX(' + clamped.toFixed(1) + 'px)';
         });
         if (title && tFirst) {
           var tLast = title.getBoundingClientRect();
@@ -615,6 +684,7 @@
         var done = false;
         function cleanup() {
           if (done) return; done = true;
+          hdr.style.overflow = '';
           navAs.forEach(function(a) { a.style.transition = ''; a.style.transform = ''; });
           if (title) { title.style.transition = ''; title.style.transform = ''; }
           if (tagline) {
@@ -743,7 +813,9 @@
       nav.addEventListener('mouseleave', release);
     }());
   </script>
-  <script src="../assets/posts.js"></script>
+  <script src="../assets/posts.js?v=3"></script>
   <script>window.renderPosts('post-list', 'pokemon');</script>
 </body>
 </html>
+
+
