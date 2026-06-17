@@ -403,9 +403,9 @@
 
     /* ── Image embed ── */
     .image-wrapper {
-      display: inline-block;
-      width: 100%;
-      margin-bottom: 1rem;
+      display: block;
+      max-width: 75%;
+      margin: 0 auto 1rem;
       border: 2px solid #252525;
       border-top-color: #3a3a3a;
       border-left-color: #3a3a3a;
@@ -425,7 +425,7 @@
       height: auto;
     }
 
-    .image-wrapper + .image-caption { margin-top: -0.75rem; }
+    .image-wrapper + .image-caption { margin-top: -0.75rem; max-width: 75%; margin-left: auto; margin-right: auto; }
 
     .image-caption {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -437,7 +437,8 @@
     }
 
     /* ── Gallery ── */
-    .gallery { position: relative; margin-bottom: 1rem; }
+    .gallery { position: relative; margin: 0 auto 1rem; max-width: 75%; }
+    .gallery .image-wrapper { width: 100%; max-width: 100%; }
     .gallery-image-area { position: relative; }
     .gallery-btn {
       position: absolute;
