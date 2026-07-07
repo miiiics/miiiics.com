@@ -108,12 +108,12 @@
 ];
 
 window.BADGE_DEFS = {
-  art:      { cls: 'badge-art',      label: '✏ Art',      href: '/art' },
-  misc:     { cls: 'badge-misc',     label: '⁂ Misc.',    href: '/miscellaneous' },
-  music:    { cls: 'badge-music',    label: '♪ Music',    href: '/music' },
-  pokemon:  { cls: 'badge-pokemon',  label: '<span class="badge-svg-icon" style="-webkit-mask-image:url(../assets/icons/pokeball.svg);mask-image:url(../assets/icons/pokeball.svg)" aria-hidden="true"></span> Pokémon', href: '/pokemon' },
-  projects: { cls: 'badge-projects', label: '⚒ Projects', href: '/projects' },
-  youtube:  { cls: 'badge-youtube',  label: '<span class="badge-svg-icon" style="-webkit-mask-image:url(../assets/icons/play.svg);mask-image:url(../assets/icons/play.svg)" aria-hidden="true"></span> YouTube', href: '/youtube' }
+  art:      { cls: 'badge-art',      label: '✏ Art',      href: '/miiiics/art' },
+  misc:     { cls: 'badge-misc',     label: '⁂ Misc.',    href: '/miiiics/miscellaneous' },
+  music:    { cls: 'badge-music',    label: '♪ Music',    href: '/miiiics/music' },
+  pokemon:  { cls: 'badge-pokemon',  label: '<span class="badge-svg-icon" style="-webkit-mask-image:url(../assets/icons/pokeball.svg);mask-image:url(../assets/icons/pokeball.svg)" aria-hidden="true"></span> Pokémon', href: '/miiiics/pokemon' },
+  projects: { cls: 'badge-projects', label: '⚒ Projects', href: '/miiiics/projects' },
+  youtube:  { cls: 'badge-youtube',  label: '<span class="badge-svg-icon" style="-webkit-mask-image:url(../assets/icons/play.svg);mask-image:url(../assets/icons/play.svg)" aria-hidden="true"></span> YouTube', href: '/miiiics/youtube' }
 };
 
 function galleryDotOpacity(dist) {

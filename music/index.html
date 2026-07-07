@@ -20,7 +20,6 @@
   <link rel="manifest" href="../assets/favicon_io/site.webmanifest">
   <!--END Favicons-->
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
     @font-face {
       font-family: 'Coolvetica';
@@ -73,39 +72,21 @@
 
     .site-title {
       margin: 0;
-      font-size: 3rem;
       line-height: 1;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      font-family: 'Bebas Neue', Georgia, serif;
-      transition: font-size 0.25s ease;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
     }
 
-    .site-title a {
-      color: #e8e8e8;
-      line-height: 1;
+    .site-logo {
+      height: 3rem;
+      width: auto;
+      display: block;
+      transition: height 0.25s ease;
     }
+
 
     .site-title a:hover {
       text-decoration: none;
-      color: #38b038;
     }
 
-    .logo-i, .logo-s {
-      display: inline-block;
-      transform-origin: 50% 88%;
-    }
-
-    .logo-i-outer { transform: scaleY(1.05); }
-    .logo-i-inner { transform: scaleY(1.10); }
-    .logo-s { transform: scaleY(0.92); }
-    .logo-m { display: inline-block; clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%); }
-
-    .title-com {
-      font-size: 0.5em;
-      vertical-align: baseline;
-    }
 
     .site-tagline {
       margin: 0.25rem 0 0.45rem;
@@ -132,13 +113,16 @@
     }
 
     .site-header.header-compact .site-title {
-      font-size: 1.2rem;
       padding-right: 0.75rem;
       white-space: nowrap;
       flex-shrink: 0;
       position: relative;
       z-index: 2;
       background: inherit;
+    }
+
+    .site-header.header-compact .site-logo {
+      height: 1.4rem;
     }
 
     .site-header.header-compact .site-tagline {
@@ -579,16 +563,16 @@
 
   <header class="site-header">
     <div class="site-header-inner">
-      <h1 class="site-title"><a href="/home"><span class="logo-m">M</span><span class="logo-i logo-i-outer">i</span><span class="logo-i logo-i-inner">i</span><span class="logo-i logo-i-inner">i</span><span class="logo-i logo-i-outer">i</span>c<span class="logo-s">s</span><span class="title-com">.com</span></a></h1>
+      <h1 class="site-title"><a href="/miiiics/home"><img src="../assets/miiiics_logo.svg" alt="Miiiics.com" class="site-logo"></a></h1>
       <p class="site-tagline">- where curiosity, creativity, and ADHD collide -</p>
       <nav class="site-nav" aria-label="Main navigation">
-        <a href="/home">Home</a>
-        <a href="/projects">Projects</a>
-        <a href="/music" class="nav-active">Music</a>
-        <a href="/pokemon">Pokémon</a>
-        <a href="/art">Art</a>
-        <a href="/youtube">YouTube</a>
-        <a href="/miscellaneous">Misc.</a>
+        <a href="/miiiics/home">Home</a>
+        <a href="/miiiics/projects">Projects</a>
+        <a href="/miiiics/music" class="nav-active">Music</a>
+        <a href="/miiiics/pokemon">Pokémon</a>
+        <a href="/miiiics/art">Art</a>
+        <a href="/miiiics/youtube">YouTube</a>
+        <a href="/miiiics/miscellaneous">Misc.</a>
       </nav>
     </div>
   </header>
@@ -602,7 +586,7 @@
   </main>
 
   <footer class="site-footer">
-    &copy; 2026 <a href="/home">miiiics.com</a>
+    &copy; 2026 <a href="/miiiics/home">miiiics.com</a>
   </footer>
 
   <script>
