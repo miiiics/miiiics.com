@@ -425,16 +425,58 @@ function paintInto(containerId, html, emptyMsg) {
   applyShowMore(container);
 }
 
+/* ── Sort order ──
+   POSTS is maintained newest-first and nothing parses the date strings (they are display
+   text, and an intro post's is a range like 'June 2026 - Present'). So ordering is done by
+   array position: 'newest' is as-authored, 'oldest' is reversed. */
+var sortDir = 'newest';
+
+/* Remembers the last render so the toggle can repeat it. */
+var lastRender = null;
+
+function applySort(posts) {
+  return sortDir === 'oldest' ? posts.slice().reverse() : posts;
+}
+
+/* Rendered as the first child of the post container, so a re-render replaces it. */
+function sortControlHtml() {
+  var newest = sortDir === 'newest';
+  return '<div class="sort-row">' +
+    '<button type="button" class="sort-btn" onclick="toggleSort()" aria-live="polite" ' +
+    'title="Switch to ' + (newest ? 'oldest' : 'newest') + ' first">' +
+    '<span class="sort-arrow" aria-hidden="true">' + (newest ? '↓' : '↑') + '</span>' +
+    '<span>' + (newest ? 'Newest first' : 'Oldest first') + '</span>' +
+    '</button></div>';
+}
+
+window.toggleSort = function () {
+  sortDir = sortDir === 'newest' ? 'oldest' : 'newest';
+  if (!lastRender) return;
+  if (lastRender.kind === 'project') {
+    window.renderProjectPosts(lastRender.containerId, lastRender.arg, lastRender.opts);
+  } else {
+    window.renderPosts(lastRender.containerId, lastRender.arg, lastRender.opts);
+  }
+  // Keep the button under the cursor after the list redraws.
+  var btn = document.querySelector('.sort-btn');
+  if (btn) btn.focus();
+};
+
 /* Home (pageCat null) and category pages.
    Project description posts are deliberately excluded everywhere here — they exist to
    introduce a project and belong only on that project's own page. */
-window.renderPosts = function (containerId, pageCat) {
+window.renderPosts = function (containerId, pageCat, opts) {
+  opts = opts || {};
+  lastRender = { kind: 'posts', containerId: containerId, arg: pageCat, opts: opts };
+
   var posts = window.POSTS.filter(function (p) { return !p.projectIntro; });
   if (pageCat) {
     posts = posts.filter(function (p) { return (p.cats || []).indexOf(pageCat) !== -1; });
   }
-  paintInto(containerId, posts.map(function (p) { return renderArticle(p); }).join(''),
-    'Nothing here yet — check back soon.');
+  // A sort control over fewer than two posts would do nothing visible.
+  var control = (opts.sort && posts.length > 1) ? sortControlHtml() : '';
+  var body = applySort(posts).map(function (p) { return renderArticle(p); }).join('');
+  paintInto(containerId, body ? control + body : '', 'Nothing here yet — check back soon.');
 };
 
 /* Expand/collapse the "About this project" panel. Animates max-height, then clears it
@@ -462,18 +504,31 @@ window.toggleProjectAbout = function (btn) {
 
 /* A single project page. The intro post leads regardless of date, shows the union of
    every category used across the project, and is collapsed behind "About this project". */
-window.renderProjectPosts = function (containerId, slug) {
+window.renderProjectPosts = function (containerId, slug, opts) {
+  opts = opts || {};
+  lastRender = { kind: 'project', containerId: containerId, arg: slug, opts: opts };
+
   var unionCats = window.projectCats(slug);
-  var html = window.projectPosts(slug).map(function (p) {
-    if (!p.projectIntro) return renderArticle(p);
-    return '<section class="project-about">' +
+  var all = window.projectPosts(slug);
+  var intro = all.filter(function (p) { return p.projectIntro; })[0];
+  var rest = all.filter(function (p) { return !p.projectIntro; });
+
+  var html = '';
+
+  // The description post stays pinned above everything, whichever way the rest is sorted.
+  if (intro) {
+    html += '<section class="project-about">' +
       '<button type="button" class="project-about-toggle" aria-expanded="false" ' +
       'onclick="toggleProjectAbout(this)">' +
       '<span class="project-about-chevron" aria-hidden="true">▸</span>' +
       '<span>About this Project</span></button>' +
-      '<div class="project-about-panel">' + renderArticle(p, unionCats) + '</div>' +
+      '<div class="project-about-panel">' + renderArticle(intro, unionCats) + '</div>' +
       '</section>';
-  }).join('');
+  }
+
+  if (opts.sort !== false && rest.length > 1) html += sortControlHtml();
+  html += applySort(rest).map(function (p) { return renderArticle(p); }).join('');
+
   paintInto(containerId, html, 'No posts in this project yet — check back soon.');
 };
 

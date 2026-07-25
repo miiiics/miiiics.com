@@ -132,7 +132,7 @@ The sentinel must remain a character that cannot appear in prose — it was brie
 
 ### Cache busting
 
-All three shared assets are versioned: `site.css?v=4`, `site.js?v=1`, `posts.js?v=14`. **Bump the matching `v` in every page whenever that file changes**, otherwise returning visitors get stale content. The version numbers are set at the top of the page generator.
+All three shared assets are versioned: `site.css?v=5`, `site.js?v=1`, `posts.js?v=17`. **Bump the matching `v` in every page whenever that file changes**, otherwise returning visitors get stale content. The version numbers are set at the top of the page generator.
 
 ### Behaviour in `site.js`
 
@@ -178,9 +178,22 @@ A `blurb` is trusted content passed through `renderInline`, so it may contain `*
 
 **Adding a project:** add an entry to `window.PROJECTS`, set `project: '<slug>'` on its posts, mark one `projectIntro: true`, then create `projects/<slug>/index.html` (regenerate — the generator iterates `PROJECTS`).
 
+**Sort control.** A toggle switching between "Newest first" and "Oldest first". It orders by **array position, not by parsing dates** — `POSTS` is maintained newest-first, so `newest` is as-authored and `oldest` is `slice().reverse()`.
+
+Note this is *not* because range dates are unparseable. Only description posts ever carry a range (`'June 2026 - Present'`), the editor only offers the range fields when "Description Post" is checked, and description posts are pinned above the control and never sorted — so a parser would only ever meet definite `'Month DD, YYYY'` values.
+
+The actual reason is **one source of truth for chronology**. Home and the category pages display array order with no sort control at all. If project pages sorted by parsed date instead, the two views could disagree whenever array placement and date text diverged. Sorting by position keeps every page consistent with the same ordering.
+
+The tradeoff: a post inserted at the wrong array index is displayed wrong everywhere, and sorting inherits rather than corrects that. Switching to parsed dates would fix such a mistake on project pages only, while leaving the other pages wrong — so keep the array ordered correctly.
+
+Rendered as the first child of the post container so a re-render replaces it. It is **suppressed when there are fewer than two posts** to sort, since it would do nothing visible. `toggleSort` replays the last render via the module-level `lastRender`.
+
+**Project pages only.** On by default for `renderProjectPosts` (pass `{ sort: false }` to disable). Home and the category pages deliberately do not get it, though `renderPosts` accepts `{ sort: true }` if that ever changes. The description post is pinned **above** the control and never sorts, in either direction.
+
 ### Still to do
 
-- [ ] **Sort control** on project pages — toggle newest↔oldest. Nothing sorts at runtime today; `POSTS` array order is display order, so this needs a real sort step. Note the intro post is pinned first and should probably stay pinned regardless of sort direction.
+- [ ] **Persist sort direction** if wanted — it currently resets to newest-first on every page load.
+- [ ] **The sort control is currently invisible everywhere**, since no project yet has two or more non-description posts. It appears automatically once one does — nothing to switch on.
 - [ ] **Per-project OG images** so shared project links preview meaningfully.
 - [ ] **Re-measure "Show More" after images load** (see above) — matters more as image-heavy project posts accumulate.
 - [ ] **`dev` page heading copy is a placeholder** — "building things, breaking things, and occasionally shipping them." Reword in the site's voice.
