@@ -187,7 +187,9 @@ A `blurb` is trusted content passed through `renderInline`, so it may contain `*
 
 ## The post editor
 
-Lives **outside this repo** at `C:\Projects\Miiiics.com\tools\post-editor.html` (alongside `image-converter.html` and `ico-converter.html`). Single-file HTML/CSS/JS, opened directly in a browser — no server, no build.
+Lives in its **own private repo** at `C:\Users\Scallywaggin\Documents\GitHub\miiiics-post-editor` — single-file HTML/CSS/JS, opened directly in a browser, no server or build. It has its own `CLAUDE.md`; since the two repos are siblings, neither one's `CLAUDE.md` loads while working in the other.
+
+The remaining tools (`image-converter.html`, `ico-converter.html`) and exported drafts stay untracked at `C:\Projects\Miiiics.com\tools`.
 
 It emits a `posts.js` post object to paste into `window.POSTS`. **Its category list and the site's `BADGE_DEFS` are separate sources of truth that must be kept in sync by hand** — adding a category means editing both.
 
