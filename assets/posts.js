@@ -1,5 +1,18 @@
 ﻿window.POSTS = [
   {
+    cats: [],
+    project: 'miiiics-com',
+    date: 'July 24, 2026',
+    title: 'New Logo!',
+    body: [
+      { type: 'p', text: 'Simple, but effective.' },
+      { type: 'gallery', transparent: true, images: [
+        { src: 'assets/images/07_24_26/miiiics_logo_white.webp' },
+        { src: 'assets/images/07_24_26/miiiics.com_logo_white.webp' }
+      ] }
+    ]
+  },
+  {
     cats: ['misc'],
     project: 'miiiics-com',
     date: 'July 24, 2026',
@@ -281,8 +294,10 @@ window.galleryGoto = function (gid, idx) {
     d.classList.toggle('gallery-dot-active', i === idx);
     d.style.opacity = galleryDotOpacity(Math.abs(i - idx));
   });
-  el.querySelector('.gallery-prev').style.display = idx === 0 ? 'none' : '';
-  el.querySelector('.gallery-next').style.display = idx === total - 1 ? 'none' : '';
+  // Toggle a class rather than `display`, so the flex row keeps its width and the image
+  // does not shift when an arrow is hidden at either end.
+  el.querySelector('.gallery-prev').classList.toggle('is-hidden', idx === 0);
+  el.querySelector('.gallery-next').classList.toggle('is-hidden', idx === total - 1);
 
   setTimeout(function () {
     wrapper.removeChild(outImg);
@@ -352,7 +367,9 @@ function renderArticle(p, catsOverride) {
         if (block.type === 'p') {
           html += '<p>' + renderInline(block.text) + '</p>';
         } else if (block.type === 'img') {
-          html += '<div class="image-wrapper"><img src="' + siteBase() + block.src + '" alt="' + escapeHtml(block.caption || '') + '"></div>';
+          // `transparent: true` drops the frame — see .image-plain in site.css.
+          html += '<div class="image-wrapper' + (block.transparent ? ' image-plain' : '') +
+            '"><img src="' + siteBase() + block.src + '" alt="' + escapeHtml(block.caption || '') + '"></div>';
           if (block.caption) {
             html += '<p class="image-caption">' + block.caption + '</p>';
           }
@@ -363,9 +380,10 @@ function renderArticle(p, catsOverride) {
           var first = imgs[0] || {};
           html += '<div class="gallery" id="' + gid + '" data-index="0">';
           html += '<div class="gallery-image-area">';
-          html += '<button class="gallery-btn gallery-prev" onclick="galleryNav(\'' + gid + '\',-1)" aria-label="Previous image" style="display:none">&#8249;</button>';
-          html += '<div class="image-wrapper"><img src="' + siteBase() + first.src + '" alt="' + escapeHtml(first.caption || '') + '"></div>';
-          html += '<button class="gallery-btn gallery-next" onclick="galleryNav(\'' + gid + '\',1)" aria-label="Next image"' + (imgs.length <= 1 ? ' style="display:none"' : '') + '>&#8250;</button>';
+          html += '<button class="gallery-btn gallery-prev is-hidden" onclick="galleryNav(\'' + gid + '\',-1)" aria-label="Previous image">&#8249;</button>';
+          html += '<div class="image-wrapper' + (block.transparent ? ' image-plain' : '') +
+            '"><img src="' + siteBase() + first.src + '" alt="' + escapeHtml(first.caption || '') + '"></div>';
+          html += '<button class="gallery-btn gallery-next' + (imgs.length <= 1 ? ' is-hidden' : '') + '" onclick="galleryNav(\'' + gid + '\',1)" aria-label="Next image">&#8250;</button>';
           html += '</div>';
           if (imgs.length > 1) {
             var initShift = ((imgs.length - 1) / 2) * 18;

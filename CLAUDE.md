@@ -94,9 +94,13 @@ Note the naming mismatch: category key `misc` maps to the directory `miscellaneo
 Body block types handled by `renderPosts`:
 
 - `{type:'p', text}` — passed through `renderInline`
-- `{type:'img', src, caption}`
-- `{type:'gallery', images:[{src, caption}]}` — swipeable carousel with a sliding dot track
+- `{type:'img', src, caption, transparent?}`
+- `{type:'gallery', images:[{src, caption}], transparent?}` — carousel with a sliding dot track
 - `{type:'video', url, embedSrc, caption}`
+
+**`transparent: true`** drops the inset border and drop shadow (`.image-plain`), for images with their own alpha channel where a frame would box empty space. It is an explicit flag because **CSS cannot detect transparency** — nothing infers it from the file. Set per block, not per image; a gallery mixing framed and unframed images would need a rewrite.
+
+Gallery arrows sit **outside** the image: `.gallery-image-area` is a flex row of `[prev] [image] [next]`, the gallery spans the full content column, and the image stays at 75%. Arrows are hidden at either end with `.is-hidden` (`visibility: hidden`) rather than `display: none`, so the row keeps its width and the image does not jump sideways.
 
 Image/gallery `src` values are stored **root-relative with no leading slash and no `../`** (`assets/images/06_16_26/x.webp`); `siteBase()` is prefixed at render time.
 
@@ -105,9 +109,10 @@ A post may also carry `project: '<slug>'`, and the project's introductory post a
 ### Adding a post
 
 1. Insert the object into `window.POSTS` **in date order — newest first**. Nothing sorts at runtime; array order is the display order.
-2. Bump the cache-buster in all seven pages (see below).
-3. Syntax-check: `node --check assets/posts.js`.
-4. Deploy to Apache and check the post's category page *and* `home`.
+2. **Copy any images into the repo.** They are staged outside it at `C:\Users\Scallywaggin\Pictures\Miiiics.com Posts\<Post Name>\`, one folder per post. Copy them to `assets/images/<MM_DD_YY>/` matching the post's date. A post referencing images that were never copied in renders broken — check they return HTTP 200 locally.
+3. Bump the cache-buster in every page (see below).
+4. Syntax-check: `node --check assets/posts.js`.
+5. Deploy to Apache and check `home`, the post's category page, and its project page if it has one.
 
 The user drafts posts in an external editor whose export format is **not** the `posts.js` schema — it needs translating, not pasting:
 
@@ -132,7 +137,7 @@ The sentinel must remain a character that cannot appear in prose — it was brie
 
 ### Cache busting
 
-All three shared assets are versioned: `site.css?v=5`, `site.js?v=1`, `posts.js?v=17`. **Bump the matching `v` in every page whenever that file changes**, otherwise returning visitors get stale content. The version numbers are set at the top of the page generator.
+All three shared assets are versioned: `site.css?v=6`, `site.js?v=1`, `posts.js?v=20`. **Bump the matching `v` in every page whenever that file changes**, otherwise returning visitors get stale content. The version numbers are set at the top of the page generator.
 
 ### Behaviour in `site.js`
 
