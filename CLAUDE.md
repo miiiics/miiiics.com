@@ -4,20 +4,233 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is a static single-page website hosted on GitHub Pages at `miiiics.com` (configured via the `CNAME` file). There is no build step, no framework, and no package manager — the entire site is `index.html` plus assets.
+`miiiics.com` is a hand-written static blog served by GitHub Pages (custom domain set in `CNAME`). There is no build step, no package manager, no framework, and no dependencies — every file in the repo is served verbatim.
 
-## Deployment
+Pushing to `main` deploys. There is nothing to compile, lint, or test.
 
-Changes pushed to the `main` branch are automatically deployed by GitHub Pages. There is no CI pipeline or build process to run.
+## Internal links must stay relative
 
-## Structure
+The site is served from the domain root in production (`miiiics.com/home`) but from a subdirectory during local testing (`localhost/miiiics/home`). **All internal links are therefore relative, never root-absolute**, so the same files work in both places with no find-and-replace step before committing:
 
-- `index.html` — the entire site
-- `assets/lemonke.png` — the main image displayed full-screen
-- `assets/uhoh.mp3` — audio asset
-- `assets/favicon_io/` — favicon files in various sizes plus `site.webmanifest`
-- `CNAME` — GitHub Pages custom domain (`miiiics.com`)
+- Nav, logo, and footer links in the seven page files use `../home`, `../art`, … (pages are one level deep).
+- `BADGE_DEFS` hrefs in `assets/posts.js` use `../art`, `../miscellaneous`, … — relative URLs resolve against the *document* URL, and every page that loads `posts.js` is one level deep, so this is correct everywhere.
+- The root `index.html` redirect uses `url=home`.
 
-## Development
+Do not "fix" these into `/home`-style absolute paths — that breaks local Apache. Do not add a `/miiiics` prefix — that breaks production. Absolute URLs are correct only in `og:url` and `og:image`, which must stay `https://www.miiiics.com/…`.
 
-Open `index.html` directly in a browser to preview. No server required — all paths are relative.
+**There is no pre-commit path step.** The same files are correct in both places; commit as-is. To confirm before a push, two greps should return nothing across the page files: `(href|src)="/[^/]` (root-absolute internal paths) and `/miiiics/` (the old local-testing prefix).
+
+This relies on the server redirecting a directory URL to its trailing-slash form (`/home` → `/home/`); both GitHub Pages and Apache do this by default.
+
+Local testing flow: after a batch of edits, copy the repo to `C:\Apache24\htdocs\miiiics` and browse `localhost/miiiics/`.
+
+```powershell
+robocopy "C:\Users\Scallywaggin\Documents\GitHub\miiiics.com" "C:\Apache24\htdocs\miiiics" /E /XD ".git" ".claude" /XF "*.md" /NJH /NJS /NDL
+```
+
+(robocopy exit codes below 8 mean success, not failure. Run it from PowerShell — Git Bash mangles the `/E` flag into a path.)
+
+## Architecture
+
+### Three shared files; pages are thin
+
+All shared chrome lives in `assets/`. Pages are ~55 lines and contain only what is unique to them.
+
+- **`assets/site.css`** — every style rule on the site. It sits in `assets/`, so `url()` paths inside it are relative to `assets/` (`fonts/Coolvetica Rg.otf`, not `../assets/fonts/…`).
+- **`assets/site.js`** — sets `window.SITE_BASE`, then the four behaviour IIFEs. Load before `posts.js`.
+- **`assets/posts.js`** — all content plus all rendering.
+
+A page carries only: meta/OG tags, favicon links, the header/nav/footer markup with its `nav-active`, an optional `.page-heading`, `<div id="post-list">`, and one render call.
+
+**Nav is real HTML in each page, deliberately not injected by JS** — crawlers must see the links. It is the one thing still repeated, and it is the reason page depth matters (below).
+
+**Nav order and dividers.** `Home | Projects | Art Dev Music Pokémon YouTube Misc.` A `<span class="nav-divider">` separates each non-category link from what follows. Categories are **alphabetical with `Misc.` pinned last** — the catch-all belongs at the end, and the rule means every new category has one obvious slot. The same ordering is applied to post badges by `catCompare` in `posts.js`, so nav and badges never disagree.
+
+### `SITE_BASE` and page depth
+
+Category pages are one level deep (`home/`); project pages are two (`projects/<slug>/`). Hardcoded `../` would be wrong at depth 2, and root-absolute `/` breaks local Apache. So `site.js` derives the site root **from its own script URL**:
+
+```js
+window.SITE_BASE = s.src.replace(/assets\/site\.js(?:\?.*)?$/, '');
+```
+
+This yields the same absolute prefix at any depth under either deployment. **Every URL that `posts.js` emits — badge links, icon masks, post images — is built as `siteBase() + path`.** Consequently paths stored in `POSTS` and `BADGE_DEFS` are root-relative *without* a leading slash (`assets/images/06_16_26/x.webp`, `pokemon`). Do not put `../` or a leading `/` in post data.
+
+Static `href`/`src` attributes in page HTML still need the right depth by hand: `../` for category pages, `../../` for project pages.
+
+### Regenerating pages
+
+Pages are generated from a single template rather than hand-edited, so they cannot drift. The generator is not committed; it lives in the session scratchpad (`gen-pages.js`). To change shared page structure, prefer editing `site.css`/`site.js`; if the HTML skeleton itself must change, regenerate all pages together. Project pages are generated by iterating `window.PROJECTS`, so **adding a project means adding a registry entry and creating its directory**.
+
+Note the naming mismatch: category key `misc` maps to the directory `miscellaneous/`. The page passes `'misc'`, not `'miscellaneous'`, to `renderPosts`.
+
+### `posts.js` exports
+
+- `window.POSTS` — the post array, newest first.
+- `window.BADGE_DEFS` — category key → `{cls, label, path, icon?}`. Keys: `art`, `dev`, `misc`, `music`, `pokemon`, `youtube`. **`projects` is not a category.** Adding a category means: a `BADGE_DEFS` entry, a `.badge-<key>` colour pair in `site.css`, a nav entry and page in the generator, and a matching toggle in the post editor.
+- `window.PROJECTS` — slug → `{name, blurb}`.
+- `window.renderPosts(containerId, pageCat)` — home (`null`) and category pages.
+- `window.renderProjectPosts(containerId, slug)` — a project page.
+- `window.renderProjectIndex(containerId)` — the `/projects/` index.
+- `window.projectCats(slug)` / `window.projectPosts(slug)` — helpers.
+
+### Root redirect
+
+`index.html` at the repo root is a bare `<meta http-equiv="refresh">` to `/home` with a dark background and hidden `<p>` so no flash is visible. It is not a real page.
+
+### Post schema (`assets/posts.js`)
+
+```js
+{
+  cats: ['music', 'youtube'],   // one or more BADGE_DEFS keys; drives category-page filtering
+  date: 'June 16, 2026',        // display string only — array order controls sort
+  title: '...',
+  url: '...',                   // optional; makes the title a new-tab link
+  embedSrc: '...',              // optional; YouTube /embed/ URL rendered above the body
+  body: [ ...blocks ]           // optional
+}
+```
+
+Body block types handled by `renderPosts`:
+
+- `{type:'p', text}` — passed through `renderInline`
+- `{type:'img', src, caption}`
+- `{type:'gallery', images:[{src, caption}]}` — swipeable carousel with a sliding dot track
+- `{type:'video', url, embedSrc, caption}`
+
+Image/gallery `src` values are stored **root-relative with no leading slash and no `../`** (`assets/images/06_16_26/x.webp`); `siteBase()` is prefixed at render time.
+
+A post may also carry `project: '<slug>'`, and the project's introductory post additionally `projectIntro: true`.
+
+### Adding a post
+
+1. Insert the object into `window.POSTS` **in date order — newest first**. Nothing sorts at runtime; array order is the display order.
+2. Bump the cache-buster in all seven pages (see below).
+3. Syntax-check: `node --check assets/posts.js`.
+4. Deploy to Apache and check the post's category page *and* `home`.
+
+The user drafts posts in an external editor whose export format is **not** the `posts.js` schema — it needs translating, not pasting:
+
+| Draft export | `posts.js` |
+|---|---|
+| `"date": "2026-07-24"` | `date: 'July 24, 2026'` |
+| `{type:'p', data:{text}}` | `{type:'p', text}` |
+| `{type:'yt', data:{url, caption}}` | `{type:'video', url, embedSrc, caption}` — derive `embedSrc` from the watch URL |
+| `{type:'img', data:{images:[…]}}` | one image → `{type:'img', src, caption}`; two or more → `{type:'gallery', images:[…]}` |
+| `"src": "/assets/images/x.webp"` | `'assets/images/<MM_DD_YY>/x.webp'` (no leading `/`, no `../`) |
+| `"url": ""` | omit the key entirely |
+
+Draft exports may also contain posts that are **already published**. Check before importing — the live copy in `posts.js` may carry later copy-edits that a re-import would silently revert.
+
+### Inline text markup
+
+`renderInline` is a tiny custom formatter, **not** Markdown. Supported: `*bold*`, `_italic_`, `*_bold italic_*` / `_*bold italic*_`, and `[text](url)`. Regexes are applied in that order and do not nest beyond the bold-italic special cases.
+
+**Link URLs are protected; body prose is not.** Link *targets* are swapped for `\u0000<n>\u0000` sentinels before the emphasis regexes run, then restored at the end. Without this, an underscore in a URL (`wikipedia.org/wiki/Analysis_paralysis`) pairs with the next real `_` in the paragraph and swallows everything between them. Link *labels* stay exposed, so `[_italic label_](url)` still works.
+
+The sentinel must remain a character that cannot appear in prose — it was briefly a space-delimited number, which corrupted ordinary text like "about 40 of those". Escaping is still unsupported **outside** link targets: a literal `*` or `_` in body text will be consumed.
+
+### Cache busting
+
+All three shared assets are versioned: `site.css?v=4`, `site.js?v=1`, `posts.js?v=14`. **Bump the matching `v` in every page whenever that file changes**, otherwise returning visitors get stale content. The version numbers are set at the top of the page generator.
+
+### Behaviour in `site.js`
+
+Four IIFEs run in order after `SITE_BASE` is set:
+
+1. **Particle canvas** — 55 drifting green dots on a fixed `#bg-canvas`, clipped to start below `.site-header`'s current bottom edge so particles never bleed under the sticky header.
+2. **Header collapse** — on `scroll > 10px`, toggles `.header-compact`. Uses a FLIP animation (measure `getBoundingClientRect` before and after the class flip, apply an inverse `translateX`, then transition to zero) so nav items and the logo slide rather than teleport. A `cooling` flag suppresses re-triggering mid-animation.
+3. **Header blip** — a 10s `requestAnimationFrame` loop driving the `--blip-*` CSS custom properties for the green sweep along the header's bottom border.
+4. **Nav scroll affordances** — edge fade masks via `--fade-l`/`--fade-r`, plus a rubber-band bounce at either end of the horizontally scrollable nav.
+
+### "Show More" is automatic
+
+`renderPosts` ends with a pass that measures every `.post-body` and, if `scrollHeight > 480`, clamps it to 320px with a gradient fade mask and injects a "Show More ↓" button. **There is no per-post flag for this** — do not add one, and do not hand-write the button into a page. The threshold is 480 *rendered pixels*, not a character count, so:
+
+- It is viewport-dependent: a borderline post can collapse on a narrow phone but render in full on desktop.
+- It can under-measure image-heavy posts. Measurement is synchronous right after render, and post images carry no `width`/`height` attributes, so unloaded images contribute ~0 height. A short-text/many-image post may miss the threshold. Known and accepted; fix by re-measuring on image load if it ever matters.
+
+### Assets
+
+- `assets/fonts/` — Coolvetica and Kenyan Coffee OTFs, loaded via `@font-face` inside each page's inline style. Only `Coolvetica Rg.otf` is currently referenced.
+- `assets/icons/` — `play.svg` and `pokeball.svg`, used as CSS `mask-image` on `.badge-svg-icon` spans so the glyph inherits `currentColor`. This is why those badge labels contain inline HTML.
+- `assets/images/<MM_DD_YY>/` — post images, organized by post date, `.webp`.
+- `assets/favicon_io/` — full favicon set plus `site.webmanifest`.
+- `assets/miiiics_logo.svg` — header wordmark.
+
+## Projects feature — design and roadmap
+
+"Projects" is **not a category**. It is a second, orthogonal axis: a project groups posts that are about the same undertaking regardless of their categories. A post about modelling assets for a game is `art`; a post about playtesting it is `dev`; both carry the same project tag.
+
+**Data model.** `window.PROJECTS` in `posts.js` maps slug → `{name, blurb}`. A post opts in with `project: '<slug>'`. The project's intro post additionally carries `projectIntro: true`.
+
+A `blurb` is trusted content passed through `renderInline`, so it may contain `*bold*`/`_italic_` **or** raw inline HTML (`<em>…</em>`). The page generator strips tags from it (`plain()`) before reusing it as the project page's `meta description` and `og:description`, which must stay plain text.
+
+**Badge rendering.** Category badges render first, then a `|` divider, then the project badge last. The project badge shows "⚒ Projects" collapsed and expands on hover to "⚒ Projects — <name>" (CSS `max-width` transition on a nested span). It links to `projects/<slug>/`.
+
+**Project page** (`projects/<slug>/index.html`). Heading reads `⚒ Projects — <name>`. The `projectIntro` post renders first *regardless of date*, and on this page only it displays the union of every category used by any post in the project. All other project posts follow in normal newest-first order.
+
+**"About this project".** On the project page the intro post is wrapped in `.project-about` and **collapsed by default** behind an "About this Project" toggle (`toggleProjectAbout`, animating `max-height`, chevron rotating 90°). `max-height` is set to `none` once open so the panel reflows freely. `applyShowMore` deliberately **skips any `.post-body` inside `.project-about-panel`** — otherwise the intro post would be collapsed twice, once by the panel and again by "Show More". The collapse applies only on the project page; in the home and category feeds the intro post renders as an ordinary post.
+
+**Description posts appear on their project page only.** `renderPosts` filters out every post carrying `projectIntro`, so they never show on home or any category page — they exist to introduce a project, not as feed entries. A consequence: a description post's `cats` no longer affect where it is listed; they only drive the badges shown on the project page (via the union).
+
+**Project index** (`projects/index.html`). Lists every project with post counts, linking through to each project page. This is what the nav's "Projects" link now points to. Counts **include** the description post, since it is a real entry on that page.
+
+**Adding a project:** add an entry to `window.PROJECTS`, set `project: '<slug>'` on its posts, mark one `projectIntro: true`, then create `projects/<slug>/index.html` (regenerate — the generator iterates `PROJECTS`).
+
+### Still to do
+
+- [ ] **Sort control** on project pages — toggle newest↔oldest. Nothing sorts at runtime today; `POSTS` array order is display order, so this needs a real sort step. Note the intro post is pinned first and should probably stay pinned regardless of sort direction.
+- [ ] **Per-project OG images** so shared project links preview meaningfully.
+- [ ] **Re-measure "Show More" after images load** (see above) — matters more as image-heavy project posts accumulate.
+- [ ] **`dev` page heading copy is a placeholder** — "building things, breaking things, and occasionally shipping them." Reword in the site's voice.
+
+## The post editor
+
+Lives **outside this repo** at `C:\Projects\Miiiics.com\tools\post-editor.html` (alongside `image-converter.html` and `ico-converter.html`). Single-file HTML/CSS/JS, opened directly in a browser — no server, no build.
+
+It emits a `posts.js` post object to paste into `window.POSTS`. **Its category list and the site's `BADGE_DEFS` are separate sources of truth that must be kept in sync by hand** — adding a category means editing both.
+
+State it persists in `localStorage`:
+
+- `pe_drafts` — saved post drafts.
+- `pe_projects` — the project registry, `[{slug, name, intro?}]`, seeded with `miiiics-com` and its description post. Created projects survive reloads.
+- `pe_projects_ver` — schema version for the registry, so seed data added later can be backfilled into an existing registry without wiping it.
+
+**Projects in the editor** mirror the site's model: categories are a grid of toggles; below them an "Is this a project?" checkbox reveals a picker with a "+ New Project" button. A project name is slugified (`Five Lobotomies at Freddy's` → `five-lobotomies-at-freddys`). One project per post; it emits `project: '<slug>'` after `cats`.
+
+**Description posts.** Once a project is selected, a "Description Post" checkbox appears. Checking it swaps the single date for a **project date range** — a start month, plus either an end month or a "Present" toggle — emitted as `date: 'June 2026 - Present'`. It also emits `projectIntro: true`.
+
+**Description-post conflicts.** The registry records which post is a project's description post (`intro: {title}`). If you mark a second one, the editor blocks with a choice — *convert the old one to a regular post* or *delete it* — and prepends the resulting instruction as a comment block above the copied output, so the required manual edit travels with the paste.
+
+⚠ **This tracking is local and can drift.** The editor has no visibility into `posts.js`; it only knows what was marked *in this browser*. A description post added by hand, or from another machine, is invisible to it. **`posts.js` is the source of truth — verify against it before trusting a conflict prompt (or its absence).** The "editor reads the site as source of truth" item below would make this authoritative.
+
+**Creating a project in the editor does not create it on the site.** `window.PROJECTS` in `posts.js` and the `projects/<slug>/` directory still have to be added here. Closing that gap is the "publish pipeline" item below.
+
+### Should the editor become a desktop app?
+
+**Decision: no — keep it a single HTML file.** An `.exe` (Electron/Tauri) adds a build step, bundle updates, and code signing without unlocking anything the browser cannot already do. The two things that actually motivated the question have browser answers:
+
+- *"Remember categories, projects, drafts"* — already solved by `localStorage`.
+- *"Publish straight to the site"* — solvable without packaging, two ways:
+  - **File System Access API** (Chrome/Edge): grant the page access to the repo folder once, and it can read and rewrite `assets/posts.js` in place. Best fit — keeps git as the deploy path and nothing leaves the machine.
+  - **GitHub Contents API** with a fine-grained token: commits directly. More moving parts, and a token to look after.
+
+Note that auto-publishing on save works *against* the batching workflow — GitHub Pages allows 10 builds/hour, and commits are deliberately grouped so the live site can be checked in chunks. Writing `posts.js` locally and committing by hand keeps that control.
+
+## Ideas parking lot
+
+Captured so they are not lost; **not scheduled, not started**. Prune once done or discarded.
+
+- [ ] **Publish pipeline** — editor writes `posts.js` directly via the File System Access API instead of copy-paste. Would also let it insert the post in date order automatically and bump the cache-buster.
+- [ ] **Editor reads the site as its source of truth** — parse `assets/posts.js` for `BADGE_DEFS` and `PROJECTS` rather than duplicating them, ending the manual sync.
+- [ ] **Create a project end-to-end from the editor** — write the `PROJECTS` entry and generate `projects/<slug>/index.html`, so a new project needs no hand edits.
+- [ ] **Commit the page generator** into the repo (currently only in the session scratchpad) so regenerating pages does not depend on a live session.
+- [ ] **Project blurbs** are set only in `PROJECTS`; consider editing them from the editor too.
+- [ ] **Sort control** on project pages (also listed above).
+
+## Conventions
+
+- Design system: dark `#1c1c1c` ground, `#e8e8e8` text, green accents (`#2d8c2d`, `#38b038`, `#5fd65f`). Body copy is Georgia serif; UI chrome, post bodies, and captions are system sans-serif; headings and buttons are Coolvetica.
+- All JS is ES5-style (`var`, `function`, string concatenation) — match it.
+- `renderPosts` builds HTML by string concatenation with no escaping, so post text is trusted input. Do not feed it untrusted content.
