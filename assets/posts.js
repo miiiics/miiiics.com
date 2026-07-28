@@ -1,6 +1,23 @@
 ﻿window.POSTS = [
   {
     cats: [],
+    project: 'cat-cafe',
+    projectIntro: true,
+    date: 'July 2026 - Present',
+    title: 'My First Game - Cat Café!',
+    body: [
+      { type: 'p', text: 'There\'s absolutely nothing _unusual_ going on at this café.' },
+      { type: 'p', text: '_(In fact, the implication that there might be actually makes you look really paranoid and weird...)_' },
+      { type: 'p', text: 'This is going to be my very first game as an indie developer. I\'ve worked on games before, but only with companies. Never from the ground up, and never completely alone. I have always wanted to make my own games, but have never actually taken the jump.' },
+      { type: 'p', text: '*So, this is that jump!*' },
+      { type: 'p', text: 'As you may have gathered already, this game is about a neighborhood café with a twist. They have cats!' },
+      { type: 'p', text: 'And that is the *only* twist... There\'s nothing else going on here. Nothing weird about the cats...' },
+      { type: 'p', text: 'Anyway, this is going to be a long project so I\'ll post occasional updates/milestones here on [Miiiics.com](https://miiiics.com/)!' },
+      { type: 'p', text: '_*- Mics*_' }
+    ]
+  },
+  {
+    cats: [],
     project: 'miiiics-com',
     date: 'July 24, 2026',
     title: 'New Logo!',
@@ -62,20 +79,6 @@
       ]},
       { type: 'p', text: 'If you made it to the end of this post, congratulations! Your attention span is better than mine! Anyways, future posts won\'t be this long-winded. This is the first Pokémon-related post, so I had to kind of start from the ground up, but thanks for sticking around anyways!' },
       { type: 'p', text: '*_- Mics_*' }
-    ]
-  },
-  {
-    cats: [],
-    project: 'five-lobotomies-at-freddys',
-    projectIntro: true,
-    date: 'June 2026 - Present',
-    title: 'My First Game - Five Lobotomies at Freddy\'s',
-    body: [
-      { type: 'p', text: 'So, obviously this is a fan-game. For those unaware, this is based off of the _massive_ mascot horror franchise, "[_Five Nights at Freddy\'s_](https://store.steampowered.com/app/319510/Five_Nights_at_Freddys/)" by Scott Cawthon.' },
-      { type: 'p', text: 'My whole life I\'ve loved the idea of making video games. I was in a bit of a phase of learning Unity basics, when one day I was thinking out loud about the idea of a game where you win by literally lobotomizing the enemy, and jokingly said *"Five Lobotomies at Freddy\'s."*' },
-      { type: 'p', text: 'I have serious commitment issues, where if I think on a decision too much, I end up with [analysis paralysis](https://en.wikipedia.org/wiki/Analysis_paralysis). To avoid this, when met with a serious decision, I tend to do the most _unserious_ thing possible. So when later that day I wanted to get started on my first official game, and couldn\'t decide on an idea, I said "fuck it, Five Lobotomies at Freddy\'s."' },
-      { type: 'p', text: 'I have no prior experience with 3D game development, and up until only a week or two before taking on this project, I had no experience with 3D Modeling either. This was a huge step outside the bounds of my "expertise." I currently have no end goal for this project. The entire of my motivation lies with this one fact:' },
-      { type: 'p', text: '*I want to lobotomize Freddy Fazbear.*' }
     ]
   },
   {
@@ -163,9 +166,9 @@ window.BADGE_DEFS = {
    same undertaking whatever their categories. A post opts in with `project: '<slug>'`;
    the post that introduces the project also sets `projectIntro: true`. */
 window.PROJECTS = {
-  'five-lobotomies-at-freddys': {
-    name: 'Five Lobotomies at Freddy\'s',
-    blurb: 'Attempt #1 at 3D game development.'
+  'cat-cafe': {
+    name: 'Cat Café',
+    blurb: 'My first game as a solo dev.'
   },
   'miiiics-com': {
     name: 'Miiiics.com',

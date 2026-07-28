@@ -22,13 +22,29 @@ Do not "fix" these into `/home`-style absolute paths — that breaks local Apach
 
 This relies on the server redirecting a directory URL to its trailing-slash form (`/home` → `/home/`); both GitHub Pages and Apache do this by default.
 
-Local testing flow: after a batch of edits, copy the repo to `C:\Apache24\htdocs\miiiics` and browse `localhost/miiiics/`.
+### Local testing
 
-```powershell
-robocopy "C:\Users\Scallywaggin\Documents\GitHub\miiiics.com" "C:\Apache24\htdocs\miiiics" /E /XD ".git" ".claude" /XF "*.md" /NJH /NJS /NDL
+**Apache serves the working tree directly — there is no copy step.** `conf/extra/httpd-miiiics.conf` aliases `/miiiics` onto the repo, and `httpd.conf` includes it next to the commented-out manual include. Edit a file, refresh `localhost/miiiics/`. Nothing to stage, and no way to test a stale snapshot.
+
+```apache
+Alias /miiiics "C:/Users/Mics/Documents/GitHub/miiiics.com"
 ```
 
-(robocopy exit codes below 8 mean success, not failure. Run it from PowerShell — Git Bash mangles the `/E` flag into a path.)
+`.git`, `.claude`, and `*.md` are denied (403) so the git object store and this file are not served — matching what GitHub Pages actually publishes, which is what the old robocopy `/XD /XF` flags were for.
+
+Keep the `/miiiics` prefix rather than aliasing to the localhost root. Production serves from the domain root and this serves from a subdirectory; that difference is exactly what catches a root-absolute path before it ships.
+
+Apache runs as a console process, not a Windows service (installing the service needs admin). If it is not up:
+
+```powershell
+Start-Process C:\Apache24\bin\httpd.exe -WindowStyle Hidden   # start
+Stop-Process -Name httpd -Force                               # stop
+C:\Apache24\bin\httpd.exe -t                                  # validate config without restarting
+```
+
+Config changes need a full stop/start — `httpd -k restart` only works for a registered service.
+
+**Superseded:** the old flow copied the repo into `C:\Apache24\htdocs\miiiics` with `robocopy … /E /XD ".git" ".claude" /XF "*.md"`. Only needed now on a machine where the alias is not configured.
 
 ## Architecture
 
@@ -111,8 +127,10 @@ A post may also carry `project: '<slug>'`, and the project's introductory post a
 1. Insert the object into `window.POSTS` **in date order — newest first**. Nothing sorts at runtime; array order is the display order.
 2. **Copy any images into the repo.** They are staged outside it at `C:\Users\Scallywaggin\Pictures\Miiiics.com Posts\<Post Name>\`, one folder per post. Copy them to `assets/images/<MM_DD_YY>/` matching the post's date. A post referencing images that were never copied in renders broken — check they return HTTP 200 locally.
 3. Bump the cache-buster in every page (see below).
-4. Syntax-check: `node --check assets/posts.js`.
-5. Deploy to Apache and check `home`, the post's category page, and its project page if it has one.
+4. Syntax-check: `node --check assets/posts.js`. Node was installed per-user via winget and **is not on the PATH of a fresh shell** — prepend `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")`.
+5. Refresh `localhost/miiiics/` and check `home`, the post's category page, and its project page if it has one. No copy step — see "Local testing" above.
+
+`node --check` only catches syntax. `posts.js` also runs headlessly under node's `vm` with a stubbed `document` (it touches only `window` plus `getElementById`/`querySelectorAll`/`classList`), which catches the failures that actually happen: a `project` slug with no `PROJECTS` entry, a project with two or three `projectIntro` posts, an image `src` carrying a leading `/` or `../`, or a description post leaking into the home feed. With Apache serving the tree, the same script can `fetch` every image `src` and assert 200 — the check step 2 asks for, done in one pass rather than by eye.
 
 The user drafts posts in an external editor whose export format is **not** the `posts.js` schema — it needs translating, not pasting:
 
@@ -217,7 +235,9 @@ State it persists in `localStorage`:
 - `pe_projects` — the project registry, `[{slug, name, intro?}]`, seeded with `miiiics-com` and its description post. Created projects survive reloads.
 - `pe_projects_ver` — schema version for the registry, so seed data added later can be backfilled into an existing registry without wiping it.
 
-**Projects in the editor** mirror the site's model: categories are a grid of toggles; below them an "Is this a project?" checkbox reveals a picker with a "+ New Project" button. A project name is slugified (`Five Lobotomies at Freddy's` → `five-lobotomies-at-freddys`). One project per post; it emits `project: '<slug>'` after `cats`.
+**Projects in the editor** mirror the site's model: categories are a grid of toggles; below them an "Is this a project?" checkbox reveals a picker with a "+ New Project" button. A project name is slugified (`Cat Café` → `cat-cafe`). One project per post; it emits `project: '<slug>'` after `cats`.
+
+**Accents are folded, not dropped.** `slugify` normalizes to NFD and strips combining marks before the `[^a-z0-9]` pass, so `é` becomes `e`. It originally skipped that step, which turned `Cat Café` into `cat-caf` — a slug that reads as a typo and, since it is written onto every post in the project, spreads quietly. Letters that decompose (é, è, ñ, ü) are covered; a letter with a stroke through it (ø, ł) has no decomposed form and is still dropped.
 
 **Description posts.** Once a project is selected, a "Description Post" checkbox appears. Checking it swaps the single date for a **project date range** — a start month, plus either an end month or a "Present" toggle — emitted as `date: 'June 2026 - Present'`. It also emits `projectIntro: true`.
 
